@@ -6,15 +6,32 @@
 float sigmoidf(float x){
   return 1.f / (1.f + expf(-x));
 }
+typedef float sample[3];
+//AND-gate
+sample and_train[] = {
+  {0, 0, 0},
+  {1, 0, 0},
+  {0, 1, 0},
+  {1, 1, 1},
+};
+//NAND-gate
+sample nand_train[] = {
+  {0, 0, 1},
+  {1, 0, 1},
+  {0, 1, 1},
+  {1, 1, 0},
+};
 //OR-gate
-float train[][3] = {
+sample or_train[]={
   {0, 0, 0},
   {1, 0, 1},
   {0, 1, 1},
   {1, 1, 1},
-};
-#define train_count (sizeof(train)/sizeof(train[0]))
+    };
+#define train_count 4
 
+
+sample *train = or_train;
 float cost(float w1, float w2, float b1){
   float result = 0.0f;
   for(size_t i = 0; i < train_count; i++){

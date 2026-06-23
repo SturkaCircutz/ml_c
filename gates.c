@@ -31,7 +31,7 @@ sample or_train[]={
 #define train_count 4
 
 
-sample *train = or_train;
+sample *train =and_train;
 float cost(float w1, float w2, float b1){
   float result = 0.0f;
   for(size_t i = 0; i < train_count; i++){
@@ -58,7 +58,6 @@ int main(){
   float w2 = rand_float();
   float b1 = rand_float();
   for(size_t i = 0; i<1000*100;  ++i){
-    printf("cost = %f, w1 = %f, w2 = %f\n", cost(w1, w2, b1), w1, w2);
     float dcost1 = (cost(w1+eps, w2, b1) - cost(w1, w2, b1))/eps;
     float dcost2 = (cost(w1, w2+eps, b1) - cost(w1, w2, b1))/eps;
     float db = (cost(w1, w2, b1+eps) - cost(w1, w2, b1))/eps;

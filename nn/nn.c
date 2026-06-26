@@ -12,7 +12,7 @@ typedef struct{
 
 
 
-Xor Xor_config(Xor m){
+Xor Xor_config(void){
     Xor m;
     m.a0 = mat_malloc(1,2);
     m.w1 = mat_malloc(2,2);
@@ -21,6 +21,15 @@ Xor Xor_config(Xor m){
     m.w2 = mat_malloc(2,1);
     m.b2 = mat_malloc(1,1);
     m.a2 = mat_malloc(1,1);
+
+    mat_rand(m.a0,0, 1);
+    mat_rand(m.w1,0, 1);
+    mat_rand(m.b1,0, 1);
+    mat_rand(m.a1,0, 1);
+    mat_rand(m.w2,0, 1);
+    mat_rand(m.b2,0, 1);
+    mat_rand(m.a2,0, 1);
+    
     return m;
 }   
 void forward(Xor m){
@@ -52,21 +61,69 @@ float cost(Xor m, Mat in, Mat out){
     return c/n;
    
 }
-void grad(Xor m, float eps){
-    for(size_t i = 0; i<)
+Xor diff(Xor m, float eps, Mat in, Mat out){
+    Xor g = Xor_config();
+    float c = cost(m, in, out);
+    float store;
+    for(size_t i = 0; i<m.w1.rows; ++i){
+	for(size_t j = 0; j<m.w1.cols; ++j){
+	    store = CAL_MAT(m.w1, i, j);
+	    CAL_MAT(m.w1, i, j) += eps;
+	    CAL_MAT(g.w1, i, j) = (cost(m, in, out)-c)/eps;
+	    CAL_MAT(m.w1, i, j) = store;
+	   }
+       }
+    for(size_t i = 0; i<m.b1.rows; ++i){
+	for(size_t j = 0; j<m.b1.cols; ++j){
+	    store = CAL_MAT(m.b1, i, j);
+	    CAL_MAT(m.b1, i, j) += eps;
+	     CAL_MAT(g.b1, i, j) = (cost(m, in, out)-c)/eps;
+	    CAL_MAT(m.b1, i, j) = store;
+ 	   }
+       }       
+
+    for(size_t i = 0; i<m.b2.rows; ++i){
+	for(size_t j = 0; j<m.b2.cols; ++j){
+	    store = CAL_MAT(m.b2, i, j);
+	    CAL_MAT(m.b2, i, j) += eps;
+	    CAL_MAT(g.b2, i, j) = (cost(m, in, out)-c)/eps;
+	    CAL_MAT(m.b2, i, j) = store;
+ 	   }
+       }
+    for(size_t i = 0; i<m.w2.rows; ++i){
+	for(size_t j = 0; j<m.w2.cols; ++j){
+	    store = CAL_MAT(m.w2, i, j);
+	    CAL_MAT(m.w2, i, j) += eps;
+	    CAL_MAT(g.w2, i, j) = (cost(m, in, out)-c)/eps;
+	    CAL_MAT(m.w2, i, j) = store;
+ 	   }
+       }
+    return g;
 }
-void finite_diff(Xor m, ){
-    
+void learn (Xor g, Xor m, float rate){
+    for(size_t i = 0; i<m.w1.rows; ++i){
+	for(size_t j = 0; j<m.w1.cols; ++j){
+	    CAL_MAT(m.w1, i, j)-=rate*CAL_MAT(g.w1, i, j);
+	}
+       }
+    for(size_t i = 0; i<m.b1.rows; ++i){
+	for(size_t j = 0; j<m.b1.cols; ++j){
+	    CAL_MAT(m.b1, i, j)-=rate*CAL_MAT(g.b1, i, j);
+ 	}
+       }       
+    for(size_t i = 0; i<m.b2.rows; ++i){
+	for(size_t j = 0; j<m.b2.cols; ++j){
+	    CAL_MAT(m.b2, i, j)-=rate*CAL_MAT(g.b2, i, j);
+	}
+       }
+    for(size_t i = 0; i<m.w2.rows; ++i){
+	for(size_t j = 0; j<m.w2.cols; ++j){
+	    CAL_MAT(m.w2, i, j)-=rate*CAL_MAT(g.w2, i, j);
+ 	   }
+       }   
 }
 
-
-mat_rand(m.a0,0, 1);
-mat_rand(m.w1,0, 1);
-mat_rand(m.b1,0, 1);
-mat_rand(m.a1,0, 1);
-mat_rand(m.w2,0, 1);
-mat_rand(m.b2,0, 1);
-mat_rand(m.a2,0, 1);
+Xor m = Xor_config();
 
 
 size_t stride = 3;
@@ -74,7 +131,7 @@ float train[] ={
     0, 1, 1,
     1, 0, 1,
     0, 0, 0,
-    1, 1, 1,
+    1, 1, 0,
 };
 
 
@@ -93,10 +150,18 @@ Mat out ={
     .es = &train[2],
 };
 
-PRINT_MAT(in);
-PRINT_MAT(out);
+float eps = 1e-1;
+float rate = 1e-1;
+Xor n = Xor_config();
+Xor g = diff(n, eps, in, out);
+for(size_t i = 0; i < 10*1000; ++i){
+    printf("cost = %f\n", cost(m, in, out));
+    learn(g, m, rate);
+}
 
-printf("cost = %f\n",cost(m, in, out));
+
+
+
 
 #if 0
 for(size_t i = 0 ;i < 2;++i){

@@ -93,7 +93,6 @@ void mat_sum(Mat des, Mat a){
 	for(size_t j = 0; j < a.cols; ++j){
 	    CAL_MAT(des, i, j) += CAL_MAT(a, i, j);
 	}
-	printf("\n");
     }
      
 }
@@ -111,6 +110,7 @@ void mat_dot(Mat des, Mat a, Mat b){
     ASSERT(a.rows == des.rows);
     for(size_t i = 0; i < des.rows; ++i){
 	for(size_t j = 0; j < des.cols; ++j){
+	    CAL_MAT(des, i, j)=0;
 	    for(size_t k = 0; k < a.cols; ++k){
 		CAL_MAT(des, i, j) += CAL_MAT(a, i, k)* CAL_MAT(b, k, j);
 	    }

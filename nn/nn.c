@@ -152,25 +152,25 @@ Mat out ={
 
 float eps = 1e-1;
 float rate = 1e-1;
-Xor n = Xor_config();
-Xor g = diff(n, eps, in, out);
+Xor g = diff(m, eps, in, out);
 for(size_t i = 0; i < 10*1000; ++i){
     printf("cost = %f\n", cost(m, in, out));
+    g = diff(m, eps, in, out); // relearn the gradient
     learn(g, m, rate);
 }
 
 
-
-
-
-#if 0
 for(size_t i = 0 ;i < 2;++i){
     for(size_t j = 0 ;j < 2;++j){
-	forward(m, i, j);
+	Mat x = mat_malloc(1, 2);
+	CAL_MAT(x, 0, 0)=i;
+	CAL_MAT(x, 0, 1)=j;
+	mat_copy(m.a0, x);
+	forward(m);
 	printf("%d ^ %d = %f\n", i, j, *m.a2.es);
     }
 }
-#endif 
+ 
 return 0;    
 }
 

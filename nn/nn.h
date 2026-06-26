@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <math.h>
+
+
 #ifndef MALLOC
 #include <stdlib.h>
 #define MALLOC malloc
@@ -14,7 +16,7 @@
 #define ASSERT assert
 #endif // assert
 
-#define CAL_MAT(a, i , j) (a).es[(i)*(a).cols + (j)] // macro to simple print the mat
+#define CAL_MAT(a, i , j) (a).es[(i)*(a).stride + (j)] // macro to simple print the mat
 #define PRINT_MAT(a) mat_print(a, #a)
 
 
@@ -22,14 +24,19 @@
 typedef struct{
     size_t rows;
     size_t cols;
+    size_t stride;
     float * es;
 }Mat;
 
 
 Mat mat_malloc(size_t a, size_t b);
+
 void mat_fill(Mat a, float n);
 void mat_sig(Mat a);
 void mat_dot(Mat des, Mat a, Mat b);
+Mat mat_subm(Mat des, Mat a);
+Mat mat_row(Mat des, size_t row);
+void mat_copy(Mat des, Mat a);
 void mat_sum(Mat des, Mat a);
 void mat_mul(Mat des, Mat a);
 void mat_rand(Mat a, float low, float high);
@@ -47,6 +54,7 @@ Mat mat_malloc(size_t a, size_t b){
     Mat m;
     m.rows = a;
     m.cols = b;
+    m.stride = b;
     m.es = MALLOC(sizeof(*m.es)* m.rows * m.cols);
     return m;
 }
@@ -58,6 +66,26 @@ void mat_fill(Mat a, float n){
 	}
  }   
 }
+Mat mat_row(Mat des, size_t row){
+    return (Mat) {
+	.rows = 1,
+	.stride = des.stride,
+	.cols = des.cols,
+	.es = &CAL_MAT(des, row, 0),
+    };
+}
+
+void mat_copy(Mat des, Mat a){
+    ASSERT(a.rows == des.rows);
+    ASSERT(a.cols == des.cols);
+    for(size_t i = 0; i < a.rows; ++i){
+	for(size_t j = 0; j < a.cols; ++j){
+	    CAL_MAT(des, i, j) = CAL_MAT(a, i, j);
+	}
+    }
+
+}
+
 void mat_sum(Mat des, Mat a){
     ASSERT(a.rows == des.rows);
     ASSERT(a.cols == des.cols);

@@ -28,6 +28,16 @@ typedef struct{
     float * es;
 }Mat;
 
+typedef struct{
+    size_t count;
+    size_t *ws;
+    size_t *bs;
+    size_t *as;  // counts of a, should be b+1 or w+1.
+    Mat a0;
+    Mat w1, b1, a1;
+    Mat w2, b2, a2;
+}NN;
+
 
 Mat mat_malloc(size_t a, size_t b);
 
@@ -41,6 +51,10 @@ void mat_sum(Mat des, Mat a);
 void mat_mul(Mat des, Mat a);
 void mat_rand(Mat a, float low, float high);
 void mat_print(Mat a, char *);
+// nn settings
+NN nn_config(size_t count, size_t * layer_struct);
+void nn_print(size_t * layer_struct, char * name);
+#define NN_PRINT(a) nn_print(a, #a);
 
 float sigmoidf(float x){
     return 1.f/(1.f + expf(-x));
@@ -132,6 +146,27 @@ void mat_rand(Mat a, float low, float high){
 	for(size_t j = 0; j < a.cols; ++j){
 	    CAL_MAT(a, i, j) = rand_float()*(high - low) + low;
 	}
+    }
+}
+
+
+
+NN NN_config(size_t count, size_t * layer_struct){
+    NN n;
+    nn.count = count-1; // number of inner layers
+    n.bs = NN_MALLOC(sizeof(*n.bs) * n.count);
+    NN_ASSERT(n.bs != NULL);
+    n.ws = NN_MALLOC(sizeof(*n.ws) * n.count);
+    NN_ASSERT(n.ws != NULL);
+    n.as = NN_MALLOC(sizeof(*n.as) * (n.count+1));
+    NN_ASSERT(n.as != NULL);
+
+    n.as[0] = mat_malloc(1,layer_struct[0]);
+    
+    for(size_t i = 1; i < count; ++i){
+	n.bs[i-1] = mat_malloc(1, layer_struct[i]);
+	n.ws[i-1] = mat_malloc(n.as[i-1].cols, layer_struct[i]);
+	n.as[i] = mat_malloc(1, layer_struct[i]);
     }
 }
     

@@ -215,7 +215,7 @@ void nn_forward(NN n){
 
 
 float nn_cost(NN n, Mat in, Mat out){
-    float res;
+    float res = 0.f;
     ASSERT(in.rows == out.rows);
     ASSERT(NN_OUTPUT(n).cols == out.cols);
     size_t isize = in.rows;

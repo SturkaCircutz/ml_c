@@ -37,11 +37,20 @@ size_t nn[] = {2, 2, 1};
     NN test = NN_config(LIST_COUNT(nn), nn);
     NN g = NN_config(LIST_COUNT(nn), nn);
     nn_rand(test, 0, 1);
-    printf("cost = %f\n", nn_cost(test, in, out));
-    nn_forward(test);
-    nn_diff(test, g, eps, in, out);
-    nn_learn(test, g, rate);
-    printf("cost = %f\n", nn_cost(test, in, out));
+    for(size_t i = 0; i < 1000 * 100; ++i){
+	nn_diff(test, g, eps, in, out);
+	nn_learn(test, g, rate);
+	printf("cost = %f\n", nn_cost(test, in, out));
+    }
+
+    for(size_t i = 0; i < 2; ++i){
+	for(size_t j = 0; j<2; ++j){
+	    CAL_MAT(NN_INPUT(test), 0, 0)= i;
+	    CAL_MAT(NN_INPUT(test), 0, 1)= j;
+	    nn_forward(test);
+	    printf("%zu ^ %zu = %f\n",i,j, CAL_MAT(NN_OUTPUT(test), 0, 0));
+	}
+    }
     
     
 
@@ -189,5 +198,3 @@ for(size_t i = 0 ;i < 2;++i){
 #endif 
 return 0;    
 }
-
-

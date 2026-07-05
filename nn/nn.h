@@ -59,8 +59,10 @@ void nn_print(NN n, char * name);
 void nn_rand(NN n, float low, float high);
 void nn_forward(NN n);
 void nn_diff(NN n, NN g, float eps, Mat in, Mat out);
+void nn_backprop(NN n, NN g, Mat in, Mat out);
 float nn_cost(NN n, Mat in, Mat out);
 void nn_learn (NN n, NN g, float rate);
+void nn_zero(NN n);
 
 #define NN_PRINT(a) nn_print(a, #a)
 #define NN_INPUT(a)  a.as[0]
@@ -263,6 +265,14 @@ void nn_diff(NN n, NN g, float eps, Mat in, Mat out){
 
 
 }
+void nn_zero(NN n){
+    for(size_t i = 0; i < n.count; ++i){
+	mat_fill(n.as[i], 0);
+	mat_fill(n.bs[i], 0);
+	mat_fill(n.ws[i], 0);
+    }
+    mat_fill(n.as[n.count], 0);
+}
 void nn_learn (NN n, NN g, float rate){
     for(size_t i = 0; i < n.count; ++i){
 	for(size_t j = 0; j < n.ws[i].rows ; ++j){
@@ -281,6 +291,44 @@ void nn_learn (NN n, NN g, float rate){
 	}
     }    
 }
+void nn_backprop(NN n, NN g, Mat in, Mat out){
+    ASSERT(in.rows == out.rows);
+    ASSERT(NN_OUTPUT(n).cols == out.cols);
+    nn_zero(g);
+    for(size_t i = 0; i < in.rows; ++i){
+	mat_copy(NN_INPUT(n), mat_row(in, i));
+	nn_forward(n);
+	for(size_t j = 0; j < out.cols; ++j){
+	    CAL_MAT(NN_OUTPUT(g), 0, j) = CAL_MAT(NN_OUTPUT(n), 0, j)  - CAL_MAT(out, i, j);
+	}
 
+	for(size_t j = n.count; j > 0; --j){
+	    for(size_t k = 0; k < n.as[j].cols; ++k){
+		float da = CAL_MAT(g.as[j], 0, k);
+		float a = CAL_MAT(n.as[j], 0, k);
+		CAL_MAT(g.bs[j-1], 0, j) += 2*a*(1-a)*da;
+		for(size_t m = 0; m < n.as[j-1].cols; ++m){
+		    float pa = CAL_MAT(n.as[j-1], 0, m);
+		    float w = CAL_MAT(n.ws[j-1], m, k);
+		    CAL_MAT(g.as[j-1], 0, m) += 2*a*(1-a)*da*w;
+		    CAL_MAT(g.ws[j-1], m, k) += 2*a*(1-a)*pa;		    
+		}
+	    }
+	}
+    }
+
+    for(size_t k = 0; k < n.count; ++k){
+	for(size_t i = 0; i < g.ws[k].rows; ++i){
+	    for(size_t j = 0; j < g.ws[k].cols; ++j){
+		CAL_MAT(g.ws[k], i, j) /= in.rows;
+	    }
+	}
+	for(size_t i = 0; i < g.bs[k].rows; ++i){
+	    for(size_t j = 0; j < g.bs[k].cols; ++j){
+		CAL_MAT(g.bs[k], i, j) /= in.rows;
+	    }
+	}	
+    }
+}
 #endif // nn implement
 #endif //nn h

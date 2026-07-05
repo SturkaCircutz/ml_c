@@ -4,10 +4,10 @@
 
 
 int main(){
-    srand(time(0));
+    srand(60);
  
 float eps = 1e-1;
-float rate = 1e-1;
+float rate = 10;
 
 size_t stride = 3;
 float train[] ={
@@ -37,10 +37,14 @@ size_t nn[] = {2, 2, 1};
     NN test = NN_config(LIST_COUNT(nn), nn);
     NN g = NN_config(LIST_COUNT(nn), nn);
     nn_rand(test, 0, 1);
-    for(size_t i = 0; i < 1000 * 100; ++i){
+    for(size_t i = 0; i < 1000; ++i){
+#if 0
 	nn_diff(test, g, eps, in, out);
-	nn_learn(test, g, rate);
-	printf("cost = %f\n", nn_cost(test, in, out));
+#else
+       nn_backprop(test, g, in, out);
+#endif
+       nn_learn(test, g, rate);
+       printf("cost = %f\n", nn_cost(test, in, out));
     }
 
     for(size_t i = 0; i < 2; ++i){
@@ -54,7 +58,8 @@ size_t nn[] = {2, 2, 1};
     
     
 
-return 0;
+    return 0;
+    }
 typedef struct{
     Mat a0;
     Mat w1, b1, a1;
@@ -172,29 +177,7 @@ void learn (Xor g, Xor m, float rate){
 	for(size_t j = 0; j<m.w2.cols; ++j){
 	    CAL_MAT(m.w2, i, j)-=rate*CAL_MAT(g.w2, i, j);
  	   }
-       }   
+       }
+       
 }
-
-Xor m = Xor_config();
-# if 0
-//Xor g = diff(m, eps, in, out);
-for(size_t i = 0; i < 10*1000; ++i){
-    printf("cost = %f\n", cost(m, in, out));
-    g = diff(m, eps, in, out); // relearn the gradient
-    learn(g, m, rate);
-}
-
-
-for(size_t i = 0 ;i < 2;++i){
-    for(size_t j = 0 ;j < 2;++j){
-	Mat x = mat_malloc(1, 2);
-	CAL_MAT(x, 0, 0)=i;
-	CAL_MAT(x, 0, 1)=j;
-	mat_copy(m.a0, x);
-	forward(m);
-	printf("%d ^ %d = %f\n", i, j, *m.a2.es);
-    }
-}
-#endif 
-return 0;    
-}
+  

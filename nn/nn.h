@@ -295,9 +295,13 @@ void nn_backprop(NN n, NN g, Mat in, Mat out){
     ASSERT(in.rows == out.rows);
     ASSERT(NN_OUTPUT(n).cols == out.cols);
     nn_zero(g);
+
     for(size_t i = 0; i < in.rows; ++i){
 	mat_copy(NN_INPUT(n), mat_row(in, i));
 	nn_forward(n);
+	for(size_t j = 0; j < n.count; ++j){
+	    mat_fill(g.as[j], 0);
+	}
 	for(size_t j = 0; j < out.cols; ++j){
 	    CAL_MAT(NN_OUTPUT(g), 0, j) = CAL_MAT(NN_OUTPUT(n), 0, j)  - CAL_MAT(out, i, j);
 	}
@@ -306,12 +310,13 @@ void nn_backprop(NN n, NN g, Mat in, Mat out){
 	    for(size_t k = 0; k < n.as[j].cols; ++k){
 		float da = CAL_MAT(g.as[j], 0, k);
 		float a = CAL_MAT(n.as[j], 0, k);
-		CAL_MAT(g.bs[j-1], 0, j) += 2*a*(1-a)*da;
+		CAL_MAT(g.bs[j-1], 0, k) += 2*a*(1-a)*da;
 		for(size_t m = 0; m < n.as[j-1].cols; ++m){
+		    
 		    float pa = CAL_MAT(n.as[j-1], 0, m);
 		    float w = CAL_MAT(n.ws[j-1], m, k);
 		    CAL_MAT(g.as[j-1], 0, m) += 2*a*(1-a)*da*w;
-		    CAL_MAT(g.ws[j-1], m, k) += 2*a*(1-a)*pa;		    
+		    CAL_MAT(g.ws[j-1], m, k) += 2*da*a*(1-a)*pa;		    
 		}
 	    }
 	}
@@ -319,7 +324,7 @@ void nn_backprop(NN n, NN g, Mat in, Mat out){
 
     for(size_t k = 0; k < n.count; ++k){
 	for(size_t i = 0; i < g.ws[k].rows; ++i){
-	    for(size_t j = 0; j < g.ws[k].cols; ++j){
+	    for(size_t j = 0; j < g.ws[k].cols; ++j){ 
 		CAL_MAT(g.ws[k], i, j) /= in.rows;
 	    }
 	}

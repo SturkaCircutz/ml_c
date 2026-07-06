@@ -7,7 +7,7 @@ int main(){
     srand(60);
  
 float eps = 1e-1;
-float rate = 10;
+float rate = 1e-2;
 
 size_t stride = 3;
 float train[] ={
@@ -37,16 +37,16 @@ size_t nn[] = {2, 2, 1};
     NN test = NN_config(LIST_COUNT(nn), nn);
     NN g = NN_config(LIST_COUNT(nn), nn);
     nn_rand(test, 0, 1);
-    for(size_t i = 0; i < 1000; ++i){
-#if 0
+    for(size_t i = 0; i < 1000*100; ++i){
+#if 1 
 	nn_diff(test, g, eps, in, out);
 #else
        nn_backprop(test, g, in, out);
 #endif
-       nn_learn(test, g, rate);
-       printf("cost = %f\n", nn_cost(test, in, out));
+nn_learn(test, g, rate);
     }
 
+NN_PRINT(g);
     for(size_t i = 0; i < 2; ++i){
 	for(size_t j = 0; j<2; ++j){
 	    CAL_MAT(NN_INPUT(test), 0, 0)= i;

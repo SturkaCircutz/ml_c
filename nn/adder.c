@@ -36,8 +36,8 @@ for(size_t i = 0; i < n; ++i){
     for(size_t j = 0; j < n; ++j){
 	printf("%zu + %zu =", i, j);
 	for(size_t k = 0; k < BITS; ++k){
-	    CAL_MAT(NN_INPUT(nn), 0, j) = (i>>k)&1;
-	    CAL_MAT(NN_INPUT(nn), 0, j+BITS) = (j>>k)&1;
+	    CAL_MAT(NN_INPUT(nn), 0, k) = (i>>k)&1;
+	    CAL_MAT(NN_INPUT(nn), 0, k+BITS) = (j>>k)&1;
 	}
 	nn_forward(nn);
 	if(CAL_MAT(NN_OUTPUT(nn), 0, BITS) > 0.5f) printf("overflow\n");

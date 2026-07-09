@@ -4,10 +4,7 @@ C experiments for neural networks.
 
 
 ## Demo
-
-<video controls src="assets/demo.webm"></video>
-
-Demo video: [`assets/demo.webm`](assets/demo.webm)
+[![Demo](assets/demo.gif)](assets/demo.webm)
 
 ## Build
 
